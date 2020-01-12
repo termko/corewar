@@ -72,6 +72,8 @@ void	read_file(int fd, t_core *core)
 			break ;
 		free(tmp);
 	}
+	if (tmp[i - 1] != '\n')
+		error("No newline at the end of file!");
 	free(tmp);
 }
 
@@ -155,26 +157,37 @@ t_size	get_strsize(t_core *core, int prev)
 	int		is_comment;
 	int		is_comchar;
 	int		empty;
-	
+	// TESTING WITH LAST VALUABLE CHAR
+	int		is_valued;
+
 	ret.begin = prev;
+	ret.last = prev;
 	is_comment = 0;
 	is_comchar = 0;
+	is_valued = 1;
 	empty = 1;
 	ret.end = prev;
 
 	while (ret.end < core->buff_size)
 	{
-		if (ft_isspace(core->buff[ret.end]) && empty)
+		if (ft_isspace(core->buff[ret.end]))
 		{
-			ret.begin++;
-			ret.end++;
-			continue ;
+			is_valued = 0;
+			if (empty)
+			{
+				ret.begin++;
+				ret.end++;
+				continue ;
+			}
 		}
 	
 		else if (core->buff[ret.end] == COMMENT_CHAR)
 		{
 			if (!is_comment)
+			{
 				is_comchar = 1;
+				is_valued = 0;
+			}
 		}
 	
 		else if (core->buff[ret.end] == '\n')
@@ -200,7 +213,12 @@ t_size	get_strsize(t_core *core, int prev)
 		}
 
 		else if (!is_comchar)
+		{
 			empty = 0;
+			is_valued = 1;
+		}
+		if (is_valued)
+			ret.last = ret.end;
 		ret.end++;
 	}
 	return (ret);
@@ -223,17 +241,16 @@ void	bufftostr(t_core *core)
 		size = get_strsize(core, prev);
 		prev = size.end;
 		check_malloc(core->strings[i] =
-				ft_strsub(core->buff, size.begin, size.end - size.begin));
+				ft_strsub(core->buff, size.begin, size.last - size.begin + 1));
 		
 		// DEBUG TESTING
-		/*
+/*
 		printf("STRING %d: begin %d, end %d\n", i, size.begin, size.end);
 		printf("STRING:\n");
 				for (int j = size.begin; j < size.end; j++)
 			printf("%c", core->buff[j]);
 		printf("\n\n\n");
-		*/
-
+*/
 		i++;
 	}
 	core->strings[i] = NULL;
@@ -322,13 +339,18 @@ int main(int ac, char **av)
 	core = init_core();
 	check_input(core, ac, av);
 	bufftostr(core); // Probably done, but need to test it later and upgrade
-
+		
+	for (int i = 0; core->strings[i]; i++)
+		printf("%s\n", core->strings[i]);
+	
+	parser(core);
+	
 	// DEBUG PURPOSES
 	/*
 	for (int i = 0; core->strings[i]; i++)
 		printf("%s\n", core->strings[i]);
+	printf("\nNAME %s\n\nCOMMENT %s\n", core->name, core->comment);
 	*/
-		
-	parser(core);
+	
 	return (0);
 }

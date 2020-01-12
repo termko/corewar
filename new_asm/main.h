@@ -20,6 +20,7 @@
 typedef struct	s_size
 {
 	int		begin;
+	int		last;
 	int		end;
 }				t_size;
 
