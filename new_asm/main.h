@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:32:45 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/05 22:36:04 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/01/15 04:09:09 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,41 @@
 # include <stdio.h> // DELETE ME!!!
 # define REALLOC_TIME 4096
 
+typedef struct	s_args
+{
+	int		size;
+	int		value;
+}				t_args;
+
+/*
+typedef struct	s_expect
+{
+	int		dir;
+	int		ind;
+	int		reg;
+}				t_expect;
+*/
+
+typedef struct	s_ops
+{
+	char		*name;
+	int			argc;
+	int			first[3];
+	int			second[3];
+	int			third[3];
+	int			id;
+	int			cost;
+	int			argcode;
+	int			tdir;
+}				t_ops;
+
+typedef struct	s_token			// PARSED TOKENS (OBJECTS)
+{
+	t_ops			op;
+	t_args			*args;
+	struct s_token	*next;
+}				t_token;
+
 typedef struct	s_size
 {
 	int		begin;
@@ -24,22 +59,22 @@ typedef struct	s_size
 	int		end;
 }				t_size;
 
-typedef struct	s_label
+typedef struct	s_label			// LABELS (NAME AND TO)
 {
-	
+	char			*name;
+	t_token			*to;
+	struct s_label	*next;
+	struct s_label	*prev;
 }				t_label;
-
-typedef struct	s_parse			// ARRAY OF PARSED OBJECTS FROM EACH STRING
-{
-
-}				t_parse;
 
 typedef struct	s_core
 {
 	char	*buff;
 	int		buff_size;
 	char	**strings;
-	t_parse	**parse;
+	t_label	*labels;
+	t_token	*tokens;
+	int		is_label;
 	char	*name;
 	char	*comment;
 }				t_core;

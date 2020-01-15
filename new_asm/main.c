@@ -6,16 +6,35 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:33:29 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/05 23:14:59 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/01/15 04:27:26 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "main.h"
 
-void	usage(void)
+t_ops	*ops_list(void)
 {
-	ft_putstr_fd("Usage: ./asm <path/to/file.s>\n", STDERR_FILENO);
-	exit(1);
+	static t_ops	op_tab[] = 
+	{
+    	{"live", 1, {1, 0, 0}, {}, {}, 1, 10, 0, 0},
+		{"ld", 2, {1, 1, 0}, {0, 0, 1}, {}, 2, 5, 1, 0},
+    	{"st", 2, {0, 0, 1}, {0, 1, 1}, {}, 3, 5, 1, 0},
+    	{"add", 3, {0, 0, 1}, {0, 0, 1}, {0, 0, 1}, 4, 10, 1, 0},
+    	{"sub", 3, {0, 0, 1}, {0, 0, 1}, {0, 0, 1}, 5, 10, 1, 0},
+    	{"and", 3, {1, 1, 1}, {1, 1, 1}, {0, 0, 1}, 6, 6, 1, 0},
+    	{"or", 3, {1, 1, 1}, {1, 1, 1}, {0, 0, 1}, 7, 6, 1, 0},
+    	{"xor", 3, {1, 1, 1}, {1, 1, 1}, {0, 0, 1}, 8, 6, 1, 0},
+    	{"zjmp", 1, {1, 0, 0}, {}, {}, 9, 20, 0, 1},
+    	{"ldi", 3, {1, 1, 1}, {1, 0, 1}, {0, 0, 1}, 10, 25, 1, 1},
+    	{"sti", 3, {0, 0, 1}, {1, 1, 1}, {1, 0, 1}, 11, 25, 1, 1},
+    	{"fork", 1, {1, 0, 0}, {}, {}, 12, 800, 0, 1},
+    	{"lld", 2, {1, 1, 0}, {0, 0, 1}, {}, 13, 10, 1, 0},
+    	{"lldi", 3, {1, 1, 1}, {1, 0, 1}, {0, 0, 1}, 14, 50, 1, 1},
+    	{"lfork", 1, {1, 0, 0}, {}, {}, 15, 1000, 0, 1},
+	   	{"aff", 1, {0, 0, 1}, {}, {}, 16, 2, 1, 0},
+    	{0, 0, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 0, 0, 0}
+		};
+	return (op_tab);
 }
 
 void	error(char *msg)
@@ -24,13 +43,33 @@ void	error(char *msg)
 	exit(1);
 }
 
+void	check_split(char **split, int count)
+{
+	int		i;
+
+	i = 0;
+	while (i < count)
+	{
+		if (!split[i])
+			error("Lack of arguments");
+		i++;
+	}
+	if (split[i])
+		error("Too much arguments");
+}
+
+void	usage(void)
+{
+	ft_putendl_fd("Usage: ./asm <path/to/file.s>", STDERR_FILENO);
+	exit(1);
+}
+
 void	check_malloc(void *addr)
 {
-	if (!addr)
-	{
-		ft_putstr_fd("Unexpected error with malloc!\n", STDERR_FILENO);
-		exit(1);
-	}
+	if (addr)
+		return ;
+	ft_putendl_fd("Unexpected error with malloc!", STDERR_FILENO);
+	exit(1);
 }
 
 int		ft_isspace(char c)
@@ -73,7 +112,7 @@ void	read_file(int fd, t_core *core)
 		free(tmp);
 	}
 	if (tmp[i - 1] != '\n')
-		error("No newline at the end of file!");
+		error("No endline at the end of file!");
 	free(tmp);
 }
 
@@ -172,7 +211,8 @@ t_size	get_strsize(t_core *core, int prev)
 	{
 		if (ft_isspace(core->buff[ret.end]))
 		{
-			is_valued = 0;
+			if (!is_comment)
+				is_valued = 0;
 			if (empty)
 			{
 				ret.begin++;
@@ -302,6 +342,237 @@ void	name_comment(t_core *core, char *string)
 	}
 }
 
+void	make_label(t_core *core, char *string, int i)
+{
+	t_label	*label;
+	char	*tmp;
+	int		j;
+
+	j = 0;
+	while (j < i)
+	{
+		if (!ft_strchr(LABEL_CHARS, string[j]))
+			error("Lexical error");
+		j++;
+	}
+	check_malloc(tmp = ft_strsub(string, 0, i));
+	if (!core->labels)
+	{
+		check_malloc(core->labels = (t_label*)malloc(sizeof(t_label)));
+		label = core->labels;
+		label->prev = NULL;
+	}
+	else
+	{
+		label = core->labels;
+		while (label->next)
+			label = label->next;
+		check_malloc(label->next = (t_label*)malloc(sizeof(t_label)));
+		label->next->prev = label;
+		label = label->next;
+	}
+	label->name = tmp;
+	label->next = NULL;
+}
+
+void	push_token(t_core *core, t_token *token)
+{
+	t_token	*tmp;
+
+	if (!core->tokens)
+		core->tokens = token;
+	else
+	{
+		tmp = core->tokens;
+		while (tmp->next)
+			tmp = tmp->next;
+		tmp->next = token;
+	}
+}
+
+void	check_labels(t_core *core, t_token *token)
+{
+	t_label	*tmp;
+
+	if (!core->is_label)
+		return ;
+	tmp = core->labels;
+	while (tmp->next)
+		tmp = tmp->next;
+	while (core->is_label)
+	{
+		printf("ASSIGNING %s TO %s\n", tmp->name, token->op.name);
+		tmp->to = token;
+		tmp = tmp->prev;
+		core->is_label--;
+	}
+}
+
+t_token	*create_token(t_core *core, char *tmp)
+{
+	t_ops	*op_tab;
+	t_token	*token;
+	int		i;
+
+	i = 0;
+	op_tab = ops_list();
+	while (op_tab[i].id)
+	{
+		if (ft_strequ(op_tab[i].name, tmp))
+			break ;
+		i++;
+	}
+	if (!(op_tab[i].id))
+		error("No such operation");
+
+	check_malloc(token = (t_token*)malloc(sizeof(t_token)));
+	token->op = op_tab[i];
+	printf("\nFOUND OP [%s]:\nid [%d], name [%s]\n\n", tmp, i, op_tab[i].name);
+	token->args = NULL;
+	token->next = NULL;
+	check_labels(core, token);
+	push_token(core, token);
+	return (token);
+}
+
+void	check_args(char **split, t_token *token, int arg)
+{
+	int		i;
+	char	*string;
+	int		*exp;
+
+	if (arg == 0)
+		exp = token->op.first;
+	else if (arg == 1)
+		exp = token->op.second;
+	else
+		exp = token->op.third;
+	string = split[arg];
+	i = 0;
+	while (string[i] && ft_isspace(string[i]))
+	{
+		printf("SKIPPING!\n");
+		i++;
+	}
+	if (!string[i])
+		error("Error with args");
+	printf("%d %c %d\n", exp[0], string[i], string[i] == DIRECT_CHAR);
+	if (exp[0] && string[i] == DIRECT_CHAR)
+	{
+		if (string[i + 1] == LABEL_CHAR)
+		{
+			// SOMETHING LIKE %:LOOP
+		}
+		else
+		{
+			// SOMETHING LIKE %3
+		}
+		exit (1);
+	}
+	else if (exp[2] && string[i] == 'r')
+	{
+		// SOMETHING LIKE r1
+	}
+	else
+	{
+		// SOMETHING LIKE 10
+	}
+	exit(1);
+
+	// STOPPED HERE OMG THIS IS UGLY DO SOMETHING!!!!!!!!!!1
+}
+
+void	parse_next(t_token *token, char *string)
+{
+	char	**split;
+
+	check_malloc(split = ft_strsplit(string, SEPARATOR_CHAR));
+	check_split(split, token->op.argc);
+	check_malloc(token->args =
+			(t_args*)malloc(sizeof(t_args) * token->op.argc));
+	if (token->op.argc >= 1)
+		check_args(split, token, 0);
+	if (token->op.argc >= 2)
+		check_args(split, token, 1);
+	if (token->op.argc == 3)
+		check_args(split, token, 2);
+}
+
+char	*crop_string(char *string, int start)
+{
+	char	*ret;
+	int		i;
+
+	i = start;
+	while (string[i])
+		i++;
+	if (!i)
+		return (NULL);
+	check_malloc(ret = ft_strnew(i - start));
+	i = 0;
+	while (string[start])
+	{
+		ret[i] = string[start];
+		i++;
+		start++;
+	}
+	return (ret);
+}
+
+void	parse_token(t_core *core, char *string)
+{
+	int		i;
+	int		j;
+	char	*tmp;
+	t_token	*token;
+
+	i = 0;
+	while (string[i])
+	{
+		if (string[i] == LABEL_CHAR || ft_isspace(string[i]))
+			break ;
+		i++;
+	}
+
+	if (!string[i])
+		error("Lexical error");
+	if (string[i] == LABEL_CHAR)
+	{
+		make_label(core, string, i++);
+		core->is_label++;
+		while (string[i] && ft_isspace(string[i]))
+			i++;
+	}
+	else
+		i = 0;
+	j = i;
+
+	while (string[i])
+	{
+		if (string[i] == LABEL_CHAR)
+			error("Double label error");
+		if (ft_isspace(string[i]))
+			break ;
+		i++;
+		
+	}
+	if (!string[i])
+		return ;
+	
+	check_malloc(tmp = ft_strsub(string, j, i - j));
+	
+	printf("MAYBE TOKEN %s\n", tmp);
+	
+	token = create_token(core, tmp);
+
+	parse_next(token, crop_string(string, i));
+}
+
+void	parse_cycle(t_core *core, char *string)
+{
+	parse_token(core, string);
+}
+
 void	parser(t_core *core)
 {
 	int i;
@@ -313,7 +584,8 @@ void	parser(t_core *core)
 			name_comment(core, core->strings[i]);
 		else if (!core->name || !core->comment)
 			error("No name or comment");
-		// CONTINUE HERE, IT WILL BE A FUCKING NIGHTMARE
+		else
+			parse_cycle(core, core->strings[i]);
 		i++;
 	}
 }
@@ -323,12 +595,14 @@ t_core	*init_core(void)
 	t_core *core;
 
 	check_malloc(core = (t_core*)malloc(sizeof(t_core)));
-	core->buff_size = 0;
 	core->strings = NULL;
 	core->buff = NULL;
-	core->parse = NULL;
 	core->name = NULL;
 	core->comment = NULL;
+	core->tokens = NULL;
+	core->labels = NULL;
+	core->buff_size = 0;
+	core->is_label = 0;
 	return (core);
 }
 
@@ -342,15 +616,19 @@ int main(int ac, char **av)
 		
 	for (int i = 0; core->strings[i]; i++)
 		printf("%s\n", core->strings[i]);
-	
+
+	printf("\n\nPARSER:\n\n");
+
 	parser(core);
 	
-	// DEBUG PURPOSES
-	/*
-	for (int i = 0; core->strings[i]; i++)
-		printf("%s\n", core->strings[i]);
-	printf("\nNAME %s\n\nCOMMENT %s\n", core->name, core->comment);
-	*/
-	
+	printf("\n");
+	t_token	*tmp;
+	tmp = core->tokens;
+	while (tmp)
+	{
+		printf("TOKEN %s\n", tmp->op.name);
+		tmp = tmp->next;
+	}
+
 	return (0);
 }
