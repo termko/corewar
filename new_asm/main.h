@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:32:45 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/15 04:56:28 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/01/15 07:10:59 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ typedef struct	s_label			// LABELS (NAME AND TO)
 typedef struct	s_core
 {
 	char	*buff;
+	char	*file;
 	int		buff_size;
 	char	**strings;
 	t_label	*labels;
@@ -81,5 +82,9 @@ typedef struct	s_core
 	int		is_label;
 	char	*name;
 	char	*comment;
+	void	*out;
 }				t_core;
+
+char			*ft_itoa_base(int num, int base, int len);
+void			check_malloc(void *addr);
 #endif

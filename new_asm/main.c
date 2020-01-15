@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:33:29 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/15 05:12:42 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/01/15 08:04:07 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,13 +119,18 @@ void	read_file(int fd, t_core *core)
 t_core	*check_input(t_core *core, int ac, char **av)
 {
 	int		fd;
+	int		len;
 
 	if (ac != 2)
 		usage();
-	if (ft_strcmp(av[1] + ft_strlen(av[1]) - 2, ".s"))
+	len = ft_strlen(av[1]);
+	if (ft_strcmp(av[1] + len - 2, ".s"))
 		usage();
 	if ((fd = open(av[1], 'r')) < 0)
 		error("Error opening file!");
+	check_malloc(core->file = ft_strnew(len + 2));
+	core->file = ft_strncat(core->file, av[1], len - 1);
+	core->file = ft_strcat(core->file, "cor");
 	read_file(fd, core);
 	close(fd);
 	return (core);
@@ -590,11 +595,11 @@ void	parse_token(t_core *core, char *string)
 	
 	token = create_token(core, tmp);
 
-	printf("STRING %s\n", string);
+//	printf("STRING %s\n", string);
 	parse_next(token, crop_string(string, i));
 	token->pos = core->size;
-	printf("POS = %d\n", token->pos);
-	printf("SIZE = %d\n\n", token->size);
+//	printf("POS = %d\n", token->pos);
+//	printf("SIZE = %d\n\n", token->size);
 	core->size += token->size;
 }
 
@@ -637,9 +642,67 @@ t_core	*init_core(void)
 	return (core);
 }
 
+int		ft_htonl(int x)
+{
+	return (x & 0xFF)       * 0x1000000
+		+ (x & 0xFF00)     * 0x100
+		+ (x & 0xFF0000)   / 0x100
+		+ (x & 0xFF000000) / 0x1000000;
+}
+
+int		init_out(t_core *core, int fd)
+{
+	int		size;
+	int		margin;
+	int		magic;
+
+	size = PROG_NAME_LENGTH + COMMENT_LENGTH + 16 + core->size;
+	check_malloc(core->out = malloc(sizeof(size)));
+	ft_bzero(core->out, size);
+	
+	margin = 0;
+	
+	magic = ft_htonl(COREWAR_EXEC_MAGIC);
+	
+	write(fd, &magic, 4);
+	margin += 4;
+
+	write(fd, core->name, ft_strlen(core->name));
+	write(fd, core->out, PROG_NAME_LENGTH + 4 - ft_strlen(core->name));
+	margin += PROG_NAME_LENGTH + 4;
+
+	magic = ft_htonl(core->size);
+	write(fd, &magic, 4);
+	
+	margin += 4;
+
+	write(fd, core->comment, ft_strlen(core->comment));
+	write(fd, core->out, COMMENT_LENGTH + 4 - ft_strlen(core->comment));
+	margin += COMMENT_LENGTH + 4;
+	
+	return (margin);
+}
+
+void	last_parse(t_core *core, t_token *token)
+{
+	// STOPPED HERE, INIT IS DONE I GUESS, JUST DONT FUCK UP WITH PARSING
+}
+
 void	encoding(t_core *core)
 {
-	(void)core;
+	t_token		*token;
+	int			margin;
+	int			fd;
+
+	fd = open(core->file, O_CREAT | O_RDWR | O_TRUNC, 0777);
+	margin = init_out(core, fd); // SEEMS LIKE DONE...
+	
+	token = core->tokens;
+	while (token)
+	{
+		last_parse(core, token);
+		token = token->next;
+	}
 	// You've got all you need, just encode it, don't mess up, it's easy
 }
 
