@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:32:45 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/15 04:09:09 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/01/15 04:56:28 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,9 @@ typedef struct	s_token			// PARSED TOKENS (OBJECTS)
 {
 	t_ops			op;
 	t_args			*args;
+	int				size;
+	int				pos;
+	char			*remain;
 	struct s_token	*next;
 }				t_token;
 
@@ -74,6 +77,7 @@ typedef struct	s_core
 	char	**strings;
 	t_label	*labels;
 	t_token	*tokens;
+	int		size;
 	int		is_label;
 	char	*name;
 	char	*comment;

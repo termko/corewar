@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:33:29 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/15 04:27:26 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/01/15 05:12:42 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -401,7 +401,7 @@ void	check_labels(t_core *core, t_token *token)
 		tmp = tmp->next;
 	while (core->is_label)
 	{
-		printf("ASSIGNING %s TO %s\n", tmp->name, token->op.name);
+//		printf("ASSIGNING %s TO %s\n", tmp->name, token->op.name);
 		tmp->to = token;
 		tmp = tmp->prev;
 		core->is_label--;
@@ -427,7 +427,7 @@ t_token	*create_token(t_core *core, char *tmp)
 
 	check_malloc(token = (t_token*)malloc(sizeof(t_token)));
 	token->op = op_tab[i];
-	printf("\nFOUND OP [%s]:\nid [%d], name [%s]\n\n", tmp, i, op_tab[i].name);
+//	printf("\nFOUND OP [%s]:\nid [%d], name [%s]\n\n", tmp, i, op_tab[i].name);
 	token->args = NULL;
 	token->next = NULL;
 	check_labels(core, token);
@@ -451,35 +451,57 @@ void	check_args(char **split, t_token *token, int arg)
 	i = 0;
 	while (string[i] && ft_isspace(string[i]))
 	{
-		printf("SKIPPING!\n");
+//		printf("SKIPPING!\n");
 		i++;
 	}
 	if (!string[i])
 		error("Error with args");
-	printf("%d %c %d\n", exp[0], string[i], string[i] == DIRECT_CHAR);
 	if (exp[0] && string[i] == DIRECT_CHAR)
 	{
+		/*
 		if (string[i + 1] == LABEL_CHAR)
 		{
+		*/
+			token->args[arg].size = (token->op.tdir? 2 : 4);
 			// SOMETHING LIKE %:LOOP
+		/*
 		}
 		else
 		{
+		*/
 			// SOMETHING LIKE %3
+		/*
 		}
 		exit (1);
+		*/
 	}
 	else if (exp[2] && string[i] == 'r')
 	{
+		token->args[arg].size = 1;
 		// SOMETHING LIKE r1
 	}
 	else
 	{
+		token->args[arg].size = 2;
 		// SOMETHING LIKE 10
 	}
-	exit(1);
+	token->size += token->args[arg].size;
+	//exit(1);
 
 	// STOPPED HERE OMG THIS IS UGLY DO SOMETHING!!!!!!!!!!1
+}
+
+void	split_free(char ***split)
+{
+	int i;
+
+	i = 0;
+	while ((*split)[i])
+	{
+		free((*split)[i]);
+		i++;
+	}
+	free(*split);
 }
 
 void	parse_next(t_token *token, char *string)
@@ -488,6 +510,7 @@ void	parse_next(t_token *token, char *string)
 
 	check_malloc(split = ft_strsplit(string, SEPARATOR_CHAR));
 	check_split(split, token->op.argc);
+	token->size = 1 + token->op.argcode;
 	check_malloc(token->args =
 			(t_args*)malloc(sizeof(t_args) * token->op.argc));
 	if (token->op.argc >= 1)
@@ -496,6 +519,8 @@ void	parse_next(t_token *token, char *string)
 		check_args(split, token, 1);
 	if (token->op.argc == 3)
 		check_args(split, token, 2);
+	token->remain = string;
+	split_free(&split);
 }
 
 char	*crop_string(char *string, int start)
@@ -561,11 +586,16 @@ void	parse_token(t_core *core, char *string)
 	
 	check_malloc(tmp = ft_strsub(string, j, i - j));
 	
-	printf("MAYBE TOKEN %s\n", tmp);
+//	printf("MAYBE TOKEN %s\n", tmp);
 	
 	token = create_token(core, tmp);
 
+	printf("STRING %s\n", string);
 	parse_next(token, crop_string(string, i));
+	token->pos = core->size;
+	printf("POS = %d\n", token->pos);
+	printf("SIZE = %d\n\n", token->size);
+	core->size += token->size;
 }
 
 void	parse_cycle(t_core *core, char *string)
@@ -603,7 +633,14 @@ t_core	*init_core(void)
 	core->labels = NULL;
 	core->buff_size = 0;
 	core->is_label = 0;
+	core->size = 0;
 	return (core);
+}
+
+void	encoding(t_core *core)
+{
+	(void)core;
+	// You've got all you need, just encode it, don't mess up, it's easy
 }
 
 int main(int ac, char **av)
@@ -621,7 +658,9 @@ int main(int ac, char **av)
 
 	parser(core);
 	
-	printf("\n");
+	encoding(core); // STOPPED RIGHT HERE, A FUNC UP
+
+/*
 	t_token	*tmp;
 	tmp = core->tokens;
 	while (tmp)
@@ -629,6 +668,7 @@ int main(int ac, char **av)
 		printf("TOKEN %s\n", tmp->op.name);
 		tmp = tmp->next;
 	}
-
+	*/
+	printf("CORE SIZE %d\n", core->size);
 	return (0);
 }
