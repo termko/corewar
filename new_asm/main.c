@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:33:29 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/15 08:04:07 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/01/24 16:26:34 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -586,12 +586,13 @@ void	parse_token(t_core *core, char *string)
 		i++;
 		
 	}
+	printf("%s\n", string);
 	if (!string[i])
 		return ;
 	
 	check_malloc(tmp = ft_strsub(string, j, i - j));
 	
-//	printf("MAYBE TOKEN %s\n", tmp);
+	printf("MAYBE TOKEN %s\n", tmp);
 	
 	token = create_token(core, tmp);
 
@@ -601,6 +602,17 @@ void	parse_token(t_core *core, char *string)
 //	printf("POS = %d\n", token->pos);
 //	printf("SIZE = %d\n\n", token->size);
 	core->size += token->size;
+	
+	
+	//printf("%p -> %p\n", token, token->next);
+	t_token *test;
+	test = core->tokens;
+	while (test)
+	{
+		printf("%p -> %p\n", test, test->next);
+		test = test->next;
+	}
+	printf("\n\n");
 }
 
 void	parse_cycle(t_core *core, char *string)
@@ -623,6 +635,13 @@ void	parser(t_core *core)
 			parse_cycle(core, core->strings[i]);
 		i++;
 	}
+	t_token *token;
+	token = core->tokens;
+	while (token)
+	{
+		printf("%p -> %p\n", token, token->next);
+		token = token->next;
+	}
 }
 
 t_core	*init_core(void)
@@ -636,6 +655,7 @@ t_core	*init_core(void)
 	core->comment = NULL;
 	core->tokens = NULL;
 	core->labels = NULL;
+	core->out = NULL;
 	core->buff_size = 0;
 	core->is_label = 0;
 	core->size = 0;
@@ -652,40 +672,54 @@ int		ft_htonl(int x)
 
 int		init_out(t_core *core, int fd)
 {
+	void	*tmp;
 	int		size;
 	int		margin;
 	int		magic;
 
 	size = PROG_NAME_LENGTH + COMMENT_LENGTH + 16 + core->size;
-	check_malloc(core->out = malloc(sizeof(size)));
-	ft_bzero(core->out, size);
-	
+	check_malloc(tmp = malloc(sizeof(size)));
+	ft_bzero(tmp, size);
+	printf("%p -> START OF VOID MEM\n", tmp);
+	printf("%p -> END OF VOID MEM\n", tmp + size);
+	printf("%d -> SIZE OF VOID MEM\n", size);
+
 	margin = 0;
-	
+
 	magic = ft_htonl(COREWAR_EXEC_MAGIC);
-	
-	write(fd, &magic, 4);
+
+	tmp = ft_memcpy(tmp, &magic, 4) + 4;
 	margin += 4;
 
-	write(fd, core->name, ft_strlen(core->name));
-	write(fd, core->out, PROG_NAME_LENGTH + 4 - ft_strlen(core->name));
+	tmp = ft_memcpy(tmp, core->name, ft_strlen(core->name)) +
+		PROG_NAME_LENGTH + 4;
 	margin += PROG_NAME_LENGTH + 4;
 
 	magic = ft_htonl(core->size);
-	write(fd, &magic, 4);
-	
+	tmp = ft_memcpy(tmp, &magic, 4) + 4;
 	margin += 4;
 
-	write(fd, core->comment, ft_strlen(core->comment));
-	write(fd, core->out, COMMENT_LENGTH + 4 - ft_strlen(core->comment));
+	tmp = ft_memcpy(tmp, core->comment, ft_strlen(core->comment)) +
+		COMMENT_LENGTH + 4;
 	margin += COMMENT_LENGTH + 4;
 	
+	core->out = tmp;
+
+	write(fd, core->out, margin);
+
+	// REFACTOR THIS SHIT PLEASE!!!!!!!!!!1
+
+
+//	printf("%p -> %p\n", core->out, tmp);
+
 	return (margin);
 }
 
 void	last_parse(t_core *core, t_token *token)
 {
 	// STOPPED HERE, INIT IS DONE I GUESS, JUST DONT FUCK UP WITH PARSING
+	(void)token;
+	(void)core;
 }
 
 void	encoding(t_core *core)
@@ -700,6 +734,7 @@ void	encoding(t_core *core)
 	token = core->tokens;
 	while (token)
 	{
+//		printf("%p -> %p\n", token, token->next);
 		last_parse(core, token);
 		token = token->next;
 	}
@@ -721,6 +756,31 @@ int main(int ac, char **av)
 
 	parser(core);
 	
+	t_token	*token;
+	token = core->tokens;
+	t_token *tmp;
+	printf("\n\n\n");
+	while (token->next)
+	{
+		if (!token->next->next)
+		{
+			tmp = token;
+			printf("%p -> PRELAST LIST ITEM\n", token);
+		}
+		token = token->next;
+	}
+	/*
+	int size;
+	size = PROG_NAME_LENGTH + COMMENT_LENGTH + 16 + core->size;
+	check_malloc(core->out = malloc(sizeof(size)));
+	*/
+	printf("%p -> LAST LIST ITEM\n", token);
+
+	
+	//printf("\n\nENCODER\n\n");
+
+	
+
 	encoding(core); // STOPPED RIGHT HERE, A FUNC UP
 
 /*
@@ -732,6 +792,5 @@ int main(int ac, char **av)
 		tmp = tmp->next;
 	}
 	*/
-	printf("CORE SIZE %d\n", core->size);
 	return (0);
 }
