@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:32:45 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/24 14:54:24 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/01/28 17:50:17 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,18 +20,10 @@
 typedef struct	s_args
 {
 	int		size;
-	int		type;
+	int		type;	// 1 = %3, 2 = r3, 3 = 3, 4 = %:LOOP, 5 = :LOOP
+	char	*str;
 	int		value;
 }				t_args;
-
-/*
-typedef struct	s_expect
-{
-	int		dir;
-	int		ind;
-	int		reg;
-}				t_expect;
-*/
 
 typedef struct	s_ops
 {
@@ -86,6 +78,17 @@ typedef struct	s_core
 	void	*out;
 }				t_core;
 
-char			*ft_itoa_base(int num, int base, int len);
 void			check_malloc(void *addr);
+int				ft_isdigital(char *str);
+void			check_split(char **split, int count);
+void			realloc_char(t_core *core, char *tmp, int cur, int i);
+int				ft_isspace(char c);
+void			error(char *msg);
+void			usage(void);
+int				count_strings(t_core *core);
+void			read_file(int fd, t_core *core);
+t_core			*check_input(t_core *core, int ac, char **av);
+void			bufftostr(t_core *core);
+char			*get_string(char *loc);
+t_size			get_strsize(t_core *core, int prev);
 #endif

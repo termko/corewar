@@ -5,43 +5,64 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/01/15 06:50:23 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/15 07:19:00 by ydavis           ###   ########.fr       */
+/*   Created: 2020/01/28 17:35:09 by ydavis            #+#    #+#             */
+/*   Updated: 2020/01/28 17:36:50 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "main.h"
 
-int		count_char(int num, int base)
+int		ft_isdigital(char *str)
 {
-	int		i;
+	int i;
 
-	i = 1;
-	while (num >= base)
+	i = 0;
+	while (str[i])
 	{
-		num /= base;
+		if (!ft_isdigit(str[i]) && str[i] != '-')
+			return (0);
 		i++;
 	}
-	return (i);
+	return (1);
 }
 
-char	*ft_itoa_base(int num, int base, int len)
+void    check_split(char **split, int count)
 {
-	static char	alphabet[] = "0123456789abcdef";
-	char		*ret;
-	int			size;
-	int			i;
+    int     i;
 
-	if (num == 0)
-		return ("0");
-	i = 0;
-	size = count_char(num, base);
-	check_malloc(ret = ft_strnew(len));
-	while (num > 0)
-	{
-		ret[len - i - 1] = alphabet[num % base];
-		num /= base;
-		i++;
-	}
-	return (ret);
+    i = 0;
+    while (i < count)
+    {
+        if (!split[i])
+            error("Lack of arguments");
+        i++;
+    }
+    if (split[i])
+        error("Too much arguments");
+}
+
+void    check_malloc(void *addr)
+{
+    if (addr)
+        return ;
+    ft_putendl_fd("Unexpected error with malloc!", STDERR_FILENO);
+    exit(1);
+}
+
+int     ft_isspace(char c)
+{
+    if (c != 9 && (c < 11 || c > 13) && c != ' ')
+        return (0);
+    return (1);
+}
+
+void    realloc_char(t_core *core, char *tmp, int cur, int i)
+{
+    char    *ret;
+
+    check_malloc(ret = ft_strnew(cur * REALLOC_TIME + i));
+    ret = ft_strcat(ret, core->buff);
+    ret = ft_strcat(ret, tmp);
+    free(core->buff);
+    core->buff = ret;
 }

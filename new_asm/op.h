@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/23 06:34:34 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/15 04:06:26 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/01/28 17:54:21 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 # define IND_CODE				3
 
 # define COMMENT_CHAR			'#'
+# define ALT_COMMENT_CHAR		';'
 # define LABEL_CHAR				':'
 # define DIRECT_CHAR			'%'
 # define SEPARATOR_CHAR			','

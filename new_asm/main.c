@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:33:29 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/24 16:26:34 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/01/28 17:54:53 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,106 +36,7 @@ t_ops	*ops_list(void)
 		};
 	return (op_tab);
 }
-
-void	error(char *msg)
-{
-	ft_putendl_fd(msg, STDERR_FILENO);
-	exit(1);
-}
-
-void	check_split(char **split, int count)
-{
-	int		i;
-
-	i = 0;
-	while (i < count)
-	{
-		if (!split[i])
-			error("Lack of arguments");
-		i++;
-	}
-	if (split[i])
-		error("Too much arguments");
-}
-
-void	usage(void)
-{
-	ft_putendl_fd("Usage: ./asm <path/to/file.s>", STDERR_FILENO);
-	exit(1);
-}
-
-void	check_malloc(void *addr)
-{
-	if (addr)
-		return ;
-	ft_putendl_fd("Unexpected error with malloc!", STDERR_FILENO);
-	exit(1);
-}
-
-int		ft_isspace(char c)
-{
-	if (c != 9 && (c < 11 || c > 13) && c != ' ')
-		return (0);
-	return (1);
-}
-
-void	realloc_char(t_core *core, char *tmp, int cur, int i)
-{
-	char	*ret;
-
-	check_malloc(ret = ft_strnew(cur * REALLOC_TIME + i));
-	ret = ft_strcat(ret, core->buff);
-	ret = ft_strcat(ret, tmp);
-	free(core->buff);
-	core->buff = ret;
-}
-
-void	read_file(int fd, t_core *core)
-{
-	int		cur;
-	int		i;
-	char	*tmp;
-
-	check_malloc(core->buff = ft_strnew(REALLOC_TIME));
-	cur = 0;
-	while (1)
-	{
-		check_malloc(tmp = ft_strnew(REALLOC_TIME));
-		i = read(fd, tmp, REALLOC_TIME);
-		if (i <= 0)
-			break ;
-		realloc_char(core, tmp, cur, i);
-		core->buff_size = cur * REALLOC_TIME + i;
-		cur++;
-		if (i < REALLOC_TIME)
-			break ;
-		free(tmp);
-	}
-	if (tmp[i - 1] != '\n')
-		error("No endline at the end of file!");
-	free(tmp);
-}
-
-t_core	*check_input(t_core *core, int ac, char **av)
-{
-	int		fd;
-	int		len;
-
-	if (ac != 2)
-		usage();
-	len = ft_strlen(av[1]);
-	if (ft_strcmp(av[1] + len - 2, ".s"))
-		usage();
-	if ((fd = open(av[1], 'r')) < 0)
-		error("Error opening file!");
-	check_malloc(core->file = ft_strnew(len + 2));
-	core->file = ft_strncat(core->file, av[1], len - 1);
-	core->file = ft_strcat(core->file, "cor");
-	read_file(fd, core);
-	close(fd);
-	return (core);
-}
-
+/*
 int		count_strings(t_core *core)
 {
 	int		count;
@@ -194,6 +95,7 @@ int		count_strings(t_core *core)
 		error("Error with string symbol (\")");
 	return (count);
 }
+*/
 
 t_size	get_strsize(t_core *core, int prev)
 {
@@ -226,7 +128,7 @@ t_size	get_strsize(t_core *core, int prev)
 			}
 		}
 	
-		else if (core->buff[ret.end] == COMMENT_CHAR)
+		else if (core->buff[ret.end] == COMMENT_CHAR || core->buff[ret.end] == ALT_COMMENT_CHAR)
 		{
 			if (!is_comment)
 			{
@@ -265,64 +167,6 @@ t_size	get_strsize(t_core *core, int prev)
 		if (is_valued)
 			ret.last = ret.end;
 		ret.end++;
-	}
-	return (ret);
-}
-
-void	bufftostr(t_core *core)
-{
-	int		count;
-	int		i;
-	int		prev;
-	t_size	size;
-
-	count = count_strings(core); // DOUBLECHECK THIS PIECE OF SHIT!!!!!1
-	
-	check_malloc(core->strings = (char**)malloc(sizeof(char*) * (count + 1)));
-	i = 0;
-	prev = 0;
-	while (i < count)
-	{
-		size = get_strsize(core, prev);
-		prev = size.end;
-		check_malloc(core->strings[i] =
-				ft_strsub(core->buff, size.begin, size.last - size.begin + 1));
-		
-		// DEBUG TESTING
-/*
-		printf("STRING %d: begin %d, end %d\n", i, size.begin, size.end);
-		printf("STRING:\n");
-				for (int j = size.begin; j < size.end; j++)
-			printf("%c", core->buff[j]);
-		printf("\n\n\n");
-*/
-		i++;
-	}
-	core->strings[i] = NULL;
-}
-
-char	*get_string(char *loc)
-{
-	char	*ret;
-	int		i;
-
-	i = 0;
-	while (loc[i])
-	{
-		if (loc[i] == '\"')
-			break ;
-		i++;
-	}
-	if (loc[i + 1])
-		error("String error");
-	check_malloc(ret = ft_strnew(i));
-	i = 0;
-	while (loc[i])
-	{
-		if (loc[i] == '\"')
-			break ;
-		ret[i] = loc[i];
-		i++;
 	}
 	return (ret);
 }
@@ -406,7 +250,6 @@ void	check_labels(t_core *core, t_token *token)
 		tmp = tmp->next;
 	while (core->is_label)
 	{
-//		printf("ASSIGNING %s TO %s\n", tmp->name, token->op.name);
 		tmp->to = token;
 		tmp = tmp->prev;
 		core->is_label--;
@@ -432,7 +275,6 @@ t_token	*create_token(t_core *core, char *tmp)
 
 	check_malloc(token = (t_token*)malloc(sizeof(t_token)));
 	token->op = op_tab[i];
-//	printf("\nFOUND OP [%s]:\nid [%d], name [%s]\n\n", tmp, i, op_tab[i].name);
 	token->args = NULL;
 	token->next = NULL;
 	check_labels(core, token);
@@ -455,43 +297,48 @@ void	check_args(char **split, t_token *token, int arg)
 	string = split[arg];
 	i = 0;
 	while (string[i] && ft_isspace(string[i]))
-	{
-//		printf("SKIPPING!\n");
 		i++;
-	}
 	if (!string[i])
 		error("Error with args");
 	if (exp[0] && string[i] == DIRECT_CHAR)
 	{
-		/*
+		token->args[arg].size = (token->op.tdir? 2 : 4);
 		if (string[i + 1] == LABEL_CHAR)
 		{
-		*/
-			token->args[arg].size = (token->op.tdir? 2 : 4);
+			token->args[arg].type = 4;
 			// SOMETHING LIKE %:LOOP
-		/*
 		}
 		else
 		{
-		*/
+			token->args[arg].type = 1;
 			// SOMETHING LIKE %3
-		/*
 		}
-		exit (1);
-		*/
 	}
 	else if (exp[2] && string[i] == 'r')
 	{
 		token->args[arg].size = 1;
 		// SOMETHING LIKE r1
+		token->args[arg].type = 2;
 	}
-	else
+	else if (exp[1])
 	{
 		token->args[arg].size = 2;
-		// SOMETHING LIKE 10
+		if (string[i] == LABEL_CHAR)
+		{
+			// SOMETHING LIKE :LOOP
+			token->args[arg].type = 5;
+		}
+		else
+		{
+			token->args[arg].type = 3;
+			// SOMETHING LIKE 10
+		}
 	}
+	else
+		error("Error with args");
 	token->size += token->args[arg].size;
-	//exit(1);
+	check_malloc(token->args[arg].str = ft_strdup(string));
+	printf("PARSED ARG [%d] OF TYPE %d OF SIZE %d: %s\n", arg,token->args[arg].type, token->args[arg].size, token->args[arg].str);
 
 	// STOPPED HERE OMG THIS IS UGLY DO SOMETHING!!!!!!!!!!1
 }
@@ -586,33 +433,16 @@ void	parse_token(t_core *core, char *string)
 		i++;
 		
 	}
-	printf("%s\n", string);
 	if (!string[i])
 		return ;
 	
 	check_malloc(tmp = ft_strsub(string, j, i - j));
-	
-	printf("MAYBE TOKEN %s\n", tmp);
-	
+
 	token = create_token(core, tmp);
 
-//	printf("STRING %s\n", string);
 	parse_next(token, crop_string(string, i));
 	token->pos = core->size;
-//	printf("POS = %d\n", token->pos);
-//	printf("SIZE = %d\n\n", token->size);
 	core->size += token->size;
-	
-	
-	//printf("%p -> %p\n", token, token->next);
-	t_token *test;
-	test = core->tokens;
-	while (test)
-	{
-		printf("%p -> %p\n", test, test->next);
-		test = test->next;
-	}
-	printf("\n\n");
 }
 
 void	parse_cycle(t_core *core, char *string)
@@ -634,13 +464,6 @@ void	parser(t_core *core)
 		else
 			parse_cycle(core, core->strings[i]);
 		i++;
-	}
-	t_token *token;
-	token = core->tokens;
-	while (token)
-	{
-		printf("%p -> %p\n", token, token->next);
-		token = token->next;
 	}
 }
 
@@ -677,13 +500,12 @@ int		init_out(t_core *core, int fd)
 	int		margin;
 	int		magic;
 
+	(void)fd;
 	size = PROG_NAME_LENGTH + COMMENT_LENGTH + 16 + core->size;
-	check_malloc(tmp = malloc(sizeof(size)));
-	ft_bzero(tmp, size);
-	printf("%p -> START OF VOID MEM\n", tmp);
-	printf("%p -> END OF VOID MEM\n", tmp + size);
-	printf("%d -> SIZE OF VOID MEM\n", size);
+	check_malloc(core->out = malloc(size));
+	ft_bzero(core->out, size);
 
+	tmp = core->out;
 	margin = 0;
 
 	magic = ft_htonl(COREWAR_EXEC_MAGIC);
@@ -703,23 +525,217 @@ int		init_out(t_core *core, int fd)
 		COMMENT_LENGTH + 4;
 	margin += COMMENT_LENGTH + 4;
 	
-	core->out = tmp;
-
-	write(fd, core->out, margin);
+	//write(fd, core->out, margin);
 
 	// REFACTOR THIS SHIT PLEASE!!!!!!!!!!1
-
-
-//	printf("%p -> %p\n", core->out, tmp);
 
 	return (margin);
 }
 
-void	last_parse(t_core *core, t_token *token)
+void	direct_value(t_core *core, t_token *token, int i)
 {
-	// STOPPED HERE, INIT IS DONE I GUESS, JUST DONT FUCK UP WITH PARSING
-	(void)token;
+	char	*tmp;
+	int		j;
+
 	(void)core;
+	check_malloc(tmp = ft_strtrim(token->args[i].str));
+	j = 1;
+	while (tmp[j])
+	{
+		if (tmp[j] == '+' || (!ft_isdigit(tmp[j]) && tmp[j] != '-'))
+			error("Error with direct arg");
+		j++;
+	}
+	/*
+	(void)core;
+	tmp = token->args[i].str;
+	while (tmp && ft_isspace(*tmp))
+		tmp++;
+	tmp++;
+	if (ft_strchr(tmp, '+') || !ft_isdigital(tmp))
+		error("Error with direct arg");
+*/
+	token->args[i].value = ft_atoi(tmp + 1);
+	printf("FOUND DIRECT VALUE %d FROM %s\n", token->args[i].value, token->args[i].str);
+	free(tmp);
+	token->args[i].type = 2;
+}
+
+void	register_value(t_core *core, t_token *token, int i)
+{
+	char	*begin;
+	char	*tmp;
+
+	(void)core;
+	check_malloc(begin = ft_strtrim(token->args[i].str));
+	tmp = begin + 1;
+	if (!ft_isdigital(tmp) || ft_strlen(tmp) > 2)
+		error("Error with register arg");
+	token->args[i].value = ft_atoi(tmp);
+	printf("FOUND REGISTER VALUE %d FROM %s\n", token->args[i].value, token->args[i].str);
+	free(begin);
+	token->args[i].type = 1;
+}
+
+void	indirect_value(t_core *core, t_token *token, int i)
+{
+	char	*tmp;
+	int		j;
+
+	(void)core;
+	check_malloc(tmp = ft_strtrim(token->args[i].str));
+	j = 0;
+	while (tmp[j])
+	{
+		if (tmp[j] == '+')
+			error("Error with indirect arg");
+		if (!ft_isdigit(tmp[j]) && tmp[j] != '-')
+			error("Error with indirect arg");
+		j++;
+	}
+	token->args[i].value = ft_atoi(tmp);
+	printf("FOUND INDIRECT VALUE %d FROM %s\n", token->args[i].value, token->args[i].str);
+}
+
+void	direct_label(t_core *core, t_token *token, int i)
+{
+	t_label	*label;
+	char	*tmp;
+
+	check_malloc(tmp = ft_strtrim(token->args[i].str));
+	label = core->labels;
+	while (label)
+	{
+		if (ft_strstr(tmp + 2, label->name))
+			break ;
+		label = label->next;
+	}
+	if (!label)
+		error("No such label");
+	if (!label->to)
+		token->args[i].value = (int)(core->size - token->pos);
+	else
+		token->args[i].value = (int)(label->to->pos - token->pos);
+	printf("FOUND DIRECT LABEL VALUE %d FROM %s\n", token->args[i].value, token->args[i].str);
+	free(tmp);
+	token->args[i].type = 2;
+}
+
+void	indirect_label(t_core *core, t_token *token, int i)
+{
+	char	*tmp;
+	t_label	*label;
+
+	check_malloc(tmp = ft_strtrim(token->args[i].str));
+	label = core->labels;
+	while (label)
+	{
+		if (ft_strstr(tmp + 1, label->name))
+			break ;
+		label = label->next;
+	}
+	if (!label)
+		error("No such label");
+	if (!label->to)
+		token->args[i].value = (int)(core->size - token->pos);
+	else
+		token->args[i].value = (int)(label->to->pos - token->pos);
+	printf("FOUND INDIRECT LABEL VALUE %d FROM %s\n", token->args[i].value, token->args[i].str);
+	free(tmp);
+	token->args[i].type = 3;
+}
+
+void	args_values(t_core *core, t_token *token)
+{
+	int		i;
+
+	i = 0;
+	while (i < token->op.argc)
+	{
+		if (token->args[i].type == 1)
+			direct_value(core, token, i);
+		else if (token->args[i].type == 2)
+			register_value(core, token, i);
+		else if (token->args[i].type == 3)
+			indirect_value(core, token, i);
+		else if (token->args[i].type == 4)
+			direct_label(core, token, i);
+		else if (token->args[i].type == 5)
+			indirect_label(core, token, i);
+		i++;
+	}
+}
+
+int		paste_args(t_token *token, int margin, void *tmp)
+{
+	int		i;
+	int		j;
+	int		magic;
+	char	*arr;
+
+	i = 0;
+	check_malloc(arr = ft_strnew(4));
+	while (i < token->op.argc)
+	{
+		magic = token->args[i].value;
+		j = 0;
+		while (j < token->args[i].size)
+		{
+			printf("%x\n", magic & 0xff);
+			arr[3 - j] = magic & 0xff;
+			printf("MAYBE? %x\n", arr[3 - j]);
+			magic = magic >> 0x8;
+			j++;
+		}
+		while (--j >= 0)
+			tmp = ft_memcpy(tmp, arr + 3 - j, 1) + 1;
+		margin += token->args[i].size;
+		i++;
+	}
+	free(arr);
+	return (margin);
+}
+
+int		paste_argcode(t_token *token, int margin, void *tmp)
+{
+	int				i;
+	int				magic;
+	unsigned char	value;
+
+	i = 0;
+	value = 0;
+	while (i < token->op.argc)
+	{
+		magic = (unsigned char)token->args[i].type;
+		value |= ((magic >> 1) & 0x1) << (7 - i * 2);
+		value |= (magic & 0x1) << (6 - i * 2);
+		i++;
+	}
+	printf("argcode %x\n", value);
+	ft_memcpy(tmp, &value, 1);
+	return (margin + 1);
+}
+
+int		last_parse(t_core *core, t_token *token, int margin)
+{
+	void	*tmp;
+	int		magic;
+
+	printf("\nPARSING TOKEN %s\n", token->op.name);
+	args_values(core, token);
+	
+
+	magic = token->op.id;
+
+	printf("OP %x\n", magic);
+	tmp = ft_memcpy(core->out + margin, &magic, 1) + 1;
+	margin++;
+
+	if (token->op.argcode)
+		margin = paste_argcode(token, margin, tmp++);
+	margin = paste_args(token, margin, tmp);
+	return (margin);
+	// STOPPED HERE, INIT IS DONE I GUESS, JUST DONT FUCK UP WITH PARSING
 }
 
 void	encoding(t_core *core)
@@ -734,10 +750,10 @@ void	encoding(t_core *core)
 	token = core->tokens;
 	while (token)
 	{
-//		printf("%p -> %p\n", token, token->next);
-		last_parse(core, token);
+		margin = last_parse(core, token, margin);
 		token = token->next;
 	}
+	write(fd, core->out, margin);
 	// You've got all you need, just encode it, don't mess up, it's easy
 }
 
@@ -752,45 +768,15 @@ int main(int ac, char **av)
 	for (int i = 0; core->strings[i]; i++)
 		printf("%s\n", core->strings[i]);
 
-	printf("\n\nPARSER:\n\n");
+	printf("\n\nPARSER\n");
 
 	parser(core);
 	
-	t_token	*token;
-	token = core->tokens;
-	t_token *tmp;
-	printf("\n\n\n");
-	while (token->next)
-	{
-		if (!token->next->next)
-		{
-			tmp = token;
-			printf("%p -> PRELAST LIST ITEM\n", token);
-		}
-		token = token->next;
-	}
-	/*
-	int size;
-	size = PROG_NAME_LENGTH + COMMENT_LENGTH + 16 + core->size;
-	check_malloc(core->out = malloc(sizeof(size)));
-	*/
-	printf("%p -> LAST LIST ITEM\n", token);
-
-	
-	//printf("\n\nENCODER\n\n");
-
-	
+	printf("OK\n\nENCODER\n");
 
 	encoding(core); // STOPPED RIGHT HERE, A FUNC UP
+	
+	printf("OK\n");
 
-/*
-	t_token	*tmp;
-	tmp = core->tokens;
-	while (tmp)
-	{
-		printf("TOKEN %s\n", tmp->op.name);
-		tmp = tmp->next;
-	}
-	*/
 	return (0);
 }
