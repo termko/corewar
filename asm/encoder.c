@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/01 02:38:56 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 03:20:10 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/01 04:28:51 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,8 +100,6 @@ void	encoder(t_core *core)
 	int		margin;
 	int		fd;
 
-	if (!(fd = open(core->file, O_CREAT | O_RDWR | O_TRUNC, 0777)))
-		error("Error opening output file");
 	margin = init_out(core);
 	token = core->tokens;
 	while (token)
@@ -109,6 +107,8 @@ void	encoder(t_core *core)
 		margin = last_parse(core, token, margin);
 		token = token->next;
 	}
+	if (!(fd = open(core->file, O_CREAT | O_RDWR | O_TRUNC, 0777)))
+		error("Error opening output file");
 	if (margin != write(fd, core->out, margin))
 		error("Wrote wrong number of bytes");
 	ft_putstr_fd("Writing output program to ", STDOUT_FILENO);
