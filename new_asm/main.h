@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:32:45 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/28 17:50:17 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/01 03:21:19 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,19 @@
 # include <stdio.h> // DELETE ME!!!
 # define REALLOC_TIME 4096
 
+typedef struct	s_read
+{
+	int		count;
+	int		is_comment;
+	int		empty;
+	int		is_comchar;
+	int		is_valued;
+}				t_read;
+
 typedef struct	s_args
 {
 	int		size;
-	int		type;	// 1 = %3, 2 = r3, 3 = 3, 4 = %:LOOP, 5 = :LOOP
+	int		type;
 	char	*str;
 	int		value;
 }				t_args;
@@ -38,7 +47,7 @@ typedef struct	s_ops
 	int			tdir;
 }				t_ops;
 
-typedef struct	s_token			// PARSED TOKENS (OBJECTS)
+typedef struct	s_token
 {
 	t_ops			op;
 	t_args			*args;
@@ -55,7 +64,7 @@ typedef struct	s_size
 	int		end;
 }				t_size;
 
-typedef struct	s_label			// LABELS (NAME AND TO)
+typedef struct	s_label
 {
 	char			*name;
 	t_token			*to;
@@ -91,4 +100,27 @@ t_core			*check_input(t_core *core, int ac, char **av);
 void			bufftostr(t_core *core);
 char			*get_string(char *loc);
 t_size			get_strsize(t_core *core, int prev);
+void			init_readsize(int prev, t_size *s, t_read *r);
+void			parser(t_core *core);
+void			name_comment(t_core *core, char *string);
+void			parse_token(t_core *core, char *string);
+void			make_label(t_core *core, char *string, int i);
+t_token			*create_token(t_core *core, char *string);
+void			parse_next(t_token *token, char *string);
+char			*crop_string(char *string, int i);
+void			name_comment(t_core *core, char *string);
+void			check_args(char **split, t_token *token, int arg);
+void			split_free(char ***split);
+void			check_labels(t_core *core, t_token *token);
+t_ops			*ops_list(void);
+t_core			*init_core(void);
+int				ft_htonl(int x);
+int				init_out(t_core *core);
+int				last_parse(t_core *core, t_token *token, int margin);
+void			encoder(t_core *core);
+void			direct_value(t_token *token, int i);
+void			register_value(t_token *token, int i);
+void			indirect_value(t_token *token, int i);
+void			direct_label(t_core *core, t_token *token, int i);
+void			indirect_label(t_core *core, t_token *token, int i);
 #endif

@@ -1,25 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   size_help.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/01/05 18:33:29 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 03:19:23 by ydavis           ###   ########.fr       */
+/*   Created: 2020/02/01 01:21:23 by ydavis            #+#    #+#             */
+/*   Updated: 2020/02/01 01:22:14 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "main.h"
 
-int main(int ac, char **av)
+void	init_readsize(int prev, t_size *s, t_read *r)
 {
-	t_core	*core;
-	
-	core = init_core();
-	check_input(core, ac, av);
-	bufftostr(core);
-	parser(core);
-	encoder(core);
-	return (0);
+	s->begin = prev;
+	s->last = prev;
+	s->end = prev;
+	r->is_comment = 0;
+	r->is_comchar = 0;
+	r->is_valued = 0;
+	r->empty = 1;
 }
