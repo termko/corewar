@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/23 06:34:34 by ydavis            #+#    #+#             */
-/*   Updated: 2020/01/28 17:54:21 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/01 03:31:19 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ typedef char		t_arg_type;
 # define T_DIR					2
 # define T_IND					4
 # define T_LAB					8
-
 
 typedef struct		s_header
 {

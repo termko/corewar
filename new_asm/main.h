@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:32:45 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 03:21:19 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/01 03:31:30 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 # define MAIN_H
 # include "../libft/libft.h"
 # include "op.h"
-# include <stdio.h> // DELETE ME!!!
 # define REALLOC_TIME 4096
 
 typedef struct	s_read
