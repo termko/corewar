@@ -5,62 +5,121 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/10/23 02:51:41 by ydavis            #+#    #+#             */
-/*   Updated: 2019/10/23 06:56:31 by ydavis           ###   ########.fr       */
+/*   Created: 2020/01/05 18:32:45 by ydavis            #+#    #+#             */
+/*   Updated: 2020/02/01 03:31:30 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MAIN_H
 # define MAIN_H
 # include "../libft/libft.h"
-# include <stdio.h> // DELETE ME
+# include "op.h"
+# define REALLOC_TIME 4096
 
-typedef struct	s_arg
+typedef struct	s_read
 {
-	int				id;
-	int				size;
-	int				value;
-	struct s_arg	*next;
-}				t_arg;
+	int		count;
+	int		is_comment;
+	int		empty;
+	int		is_comchar;
+	int		is_valued;
+}				t_read;
 
-typedef struct	s_com
+typedef struct	s_args
 {
-	int				id;
-	t_arg			*args;
+	int		size;
+	int		type;
+	char	*str;
+	int		value;
+}				t_args;
+
+typedef struct	s_ops
+{
+	char		*name;
+	int			argc;
+	int			first[3];
+	int			second[3];
+	int			third[3];
+	int			id;
+	int			cost;
+	int			argcode;
+	int			tdir;
+}				t_ops;
+
+typedef struct	s_token
+{
+	t_ops			op;
+	t_args			*args;
 	int				size;
-	int				mem;
-	struct s_com	*next;
-}				t_com;
+	int				pos;
+	char			*remain;
+	struct s_token	*next;
+}				t_token;
+
+typedef struct	s_size
+{
+	int		begin;
+	int		last;
+	int		end;
+}				t_size;
 
 typedef struct	s_label
 {
 	char			*name;
-	int				to;
+	t_token			*to;
+	struct s_label	*next;
+	struct s_label	*prev;
 }				t_label;
-
-typedef struct	s_scan
-{
-	char			*str;
-	struct s_scan	*next;
-}				t_scan;
-
-typedef struct	s_lexer
-{
-	t_com			*coms;
-	t_label			*labels;
-}				t_lexer;
 
 typedef struct	s_core
 {
-	t_scan			*sc;
-	t_lexer			*lex;
-	char			*name;
-	char			*comment;
-	void			*result;
+	char	*buff;
+	char	*file;
+	int		buff_size;
+	char	**strings;
+	t_label	*labels;
+	t_token	*tokens;
+	int		size;
+	int		is_label;
+	char	*name;
+	char	*comment;
+	void	*out;
 }				t_core;
 
 void			check_malloc(void *addr);
-char			*realloc_str(char **buff, int i);
-int				string_check(char **buff, char c);
-char			*read_line(int fd);
+int				ft_isdigital(char *str);
+void			check_split(char **split, int count);
+void			realloc_char(t_core *core, char *tmp, int cur, int i);
+int				ft_isspace(char c);
+void			error(char *msg);
+void			usage(void);
+int				count_strings(t_core *core);
+void			read_file(int fd, t_core *core);
+t_core			*check_input(t_core *core, int ac, char **av);
+void			bufftostr(t_core *core);
+char			*get_string(char *loc);
+t_size			get_strsize(t_core *core, int prev);
+void			init_readsize(int prev, t_size *s, t_read *r);
+void			parser(t_core *core);
+void			name_comment(t_core *core, char *string);
+void			parse_token(t_core *core, char *string);
+void			make_label(t_core *core, char *string, int i);
+t_token			*create_token(t_core *core, char *string);
+void			parse_next(t_token *token, char *string);
+char			*crop_string(char *string, int i);
+void			name_comment(t_core *core, char *string);
+void			check_args(char **split, t_token *token, int arg);
+void			split_free(char ***split);
+void			check_labels(t_core *core, t_token *token);
+t_ops			*ops_list(void);
+t_core			*init_core(void);
+int				ft_htonl(int x);
+int				init_out(t_core *core);
+int				last_parse(t_core *core, t_token *token, int margin);
+void			encoder(t_core *core);
+void			direct_value(t_token *token, int i);
+void			register_value(t_token *token, int i);
+void			indirect_value(t_token *token, int i);
+void			direct_label(t_core *core, t_token *token, int i);
+void			indirect_label(t_core *core, t_token *token, int i);
 #endif

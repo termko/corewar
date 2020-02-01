@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/23 06:34:34 by ydavis            #+#    #+#             */
-/*   Updated: 2019/10/23 06:51:13 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/01 03:31:19 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 # define IND_CODE				3
 
 # define COMMENT_CHAR			'#'
+# define ALT_COMMENT_CHAR		';'
 # define LABEL_CHAR				':'
 # define DIRECT_CHAR			'%'
 # define SEPARATOR_CHAR			','
@@ -35,14 +36,12 @@
 # define NAME_CMD_STRING		".name"
 # define COMMENT_CMD_STRING		".comment"
 
-# define REG_NUMBER				16
-
 # define PROG_NAME_LENGTH		(128)
 # define COMMENT_LENGTH			(2048)
 # define COREWAR_EXEC_MAGIC		0xea83f3
 
 /*
-** USELESS PIECE OF SH*T
+** USELESS PIECE OF SH*T (FOR VM)
 */
 
 # define MAX_ARGS_NUMBER		4
@@ -56,13 +55,14 @@
 # define NBR_LIVE				21
 # define MAX_CHECKS				10
 
+# define REG_NUMBER				16
+
 typedef char		t_arg_type;
 
 # define T_REG					1
 # define T_DIR					2
 # define T_IND					4
 # define T_LAB					8
-
 
 typedef struct		s_header
 {
