@@ -6,62 +6,31 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/11/21 16:00:03 by ydavis            #+#    #+#             */
-/*   Updated: 2018/11/29 16:15:43 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/01 04:14:09 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
-
-static char		*ft_realloc_c(char *str, char c, size_t size)
-{
-	size_t	i;
-	char	*tmp;
-
-	if (!(tmp = (char*)malloc(sizeof(char) * (size + 1))))
-		return (NULL);
-	i = 0;
-	while (i < size - 1)
-	{
-		tmp[i] = str[i];
-		i++;
-	}
-	tmp[i++] = c;
-	tmp[i] = '\0';
-	return (tmp);
-}
-
-static size_t	ft_count_trim(char const *s)
-{
-	size_t i;
-	size_t last;
-
-	i = 0;
-	last = 0;
-	while (s[i])
-	{
-		if (s[i] != ' ' && s[i] != '\n' && s[i] != '\t')
-			last = i;
-		i++;
-	}
-	return (last);
-}
+#include "libft.h"
 
 char			*ft_strtrim(char const *s)
 {
+	size_t	j;
 	size_t	i;
-	size_t	size;
 	char	*ret;
 
 	if (!s)
 		return (NULL);
 	while (*s && (*s == 9 || *s == 10 || *s == 32))
 		s++;
-	size = ft_count_trim(s);
+	j = ft_strlen(s);
+	while (j != 0 && (s[j - 1] == 9 || s[j - 1] == 10 || s[j - 1] == 32))
+		j--;
+	if (!(ret = ft_strnew(j)))
+		return (NULL);
 	i = 0;
-	while (i <= size)
+	while (i < j)
 	{
-		if (!(ret = ft_realloc_c(ret, s[i], i + 1)))
-			return (NULL);
+		ret[i] = s[i];
 		i++;
 	}
 	return (ret);

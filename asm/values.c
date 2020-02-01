@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/01 02:53:49 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 03:04:03 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/01 03:41:08 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ void	indirect_value(t_token *token, int i)
 		j++;
 	}
 	token->args[i].value = ft_atoi(tmp);
+	free(tmp);
 }
 
 void	direct_label(t_core *core, t_token *token, int i)

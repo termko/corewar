@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:32:45 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 03:31:30 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/01 03:42:34 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,4 +122,5 @@ void			register_value(t_token *token, int i);
 void			indirect_value(t_token *token, int i);
 void			direct_label(t_core *core, t_token *token, int i);
 void			indirect_label(t_core *core, t_token *token, int i);
+void			free_core(t_core **core);
 #endif

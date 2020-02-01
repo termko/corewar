@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:33:29 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 03:24:00 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/01 03:42:01 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,5 +21,6 @@ int	main(int ac, char **av)
 	bufftostr(core);
 	parser(core);
 	encoder(core);
+	free_core(&core);
 	return (0);
 }

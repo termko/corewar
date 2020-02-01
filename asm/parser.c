@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/01 01:26:08 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 02:00:17 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/01 04:16:50 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,7 @@ void	parse_token(t_core *core, char *string)
 	parse_next(token, crop_string(string, i));
 	token->pos = core->size;
 	core->size += token->size;
+	free(tmp);
 }
 
 void	parser(t_core *core)
