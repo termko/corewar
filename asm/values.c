@@ -44,6 +44,8 @@ void	register_value(t_token *token, int i)
 	token->args[i].type = 1;
 }
 
+#include "stdio.h" // DELETE ME
+
 void	indirect_value(t_token *token, int i)
 {
 	char	*tmp;
@@ -54,7 +56,10 @@ void	indirect_value(t_token *token, int i)
 	while (tmp[j])
 	{
 		if (tmp[j] == '+' || (!ft_isdigit(tmp[j]) && tmp[j] != '-'))
+		{
+			printf("???");
 			error("Illegal character in indirect arg");
+		}
 		j++;
 	}
 	token->args[i].value = ft_atoi(tmp);

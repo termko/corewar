@@ -27,10 +27,12 @@ void	check_register(t_token *token, int arg)
 	token->args[arg].type = 2;
 }
 
+#include <stdio.h>
+
 void	check_indirect(t_token *token, char *string, int arg)
 {
 	token->args[arg].size = 2;
-	if (string[1] == LABEL_CHAR)
+	if (string[0] == LABEL_CHAR)
 		token->args[arg].type = 5;
 	else
 		token->args[arg].type = 3;
