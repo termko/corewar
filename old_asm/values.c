@@ -22,7 +22,7 @@ void	direct_value(t_token *token, int i)
 	while (tmp[j])
 	{
 		if (tmp[j] == '+' || (!ft_isdigit(tmp[j]) && tmp[j] != '-'))
-			parse_error("Illegal character in direct arg", token->str);
+			error("Illegal character in direct arg");
 		j++;
 	}
 	token->args[i].value = ft_atoi(tmp + 1);
@@ -38,7 +38,7 @@ void	register_value(t_token *token, int i)
 	check_malloc(trim = ft_strtrim(token->args[i].str));
 	tmp = trim + 1;
 	if (!ft_isdigital(tmp) || ft_strlen(tmp) > 2)
-		parse_error("Illegal character in register arg", token->str);
+		error("Illegal character in register arg");
 	token->args[i].value = ft_atoi(tmp);
 	free(trim);
 	token->args[i].type = 1;
@@ -56,7 +56,10 @@ void	indirect_value(t_token *token, int i)
 	while (tmp[j])
 	{
 		if (tmp[j] == '+' || (!ft_isdigit(tmp[j]) && tmp[j] != '-'))
-			parse_error("Illegal character in indirect arg", token->str);
+		{
+			printf("???");
+			error("Illegal character in indirect arg");
+		}
 		j++;
 	}
 	token->args[i].value = ft_atoi(tmp);
@@ -77,7 +80,7 @@ void	direct_label(t_core *core, t_token *token, int i)
 		label = label->next;
 	}
 	if (!label)
-		parse_error("No such label", token->str);
+		error("No such label");
 	if (!label->to)
 		token->args[i].value = (int)(core->size - token->pos);
 	else
@@ -100,7 +103,7 @@ void	indirect_label(t_core *core, t_token *token, int i)
 		label = label->next;
 	}
 	if (!label)
-		parse_error("No such label", token->str);
+		error("No such label");
 	if (!label->to)
 		token->args[i].value = (int)(core->size - token->pos);
 	else

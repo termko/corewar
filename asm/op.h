@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/23 06:34:34 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 03:31:19 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/22 19:51:29 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,8 @@
 # define NAME_CMD_STRING		".name"
 # define COMMENT_CMD_STRING		".comment"
 
-# define PROG_NAME_LENGTH		(128)
-# define COMMENT_LENGTH			(2048)
+# define PROG_NAME_LENGTH		128
+# define COMMENT_LENGTH			2048
 # define COREWAR_EXEC_MAGIC		0xea83f3
 
 /*
@@ -46,9 +46,9 @@
 
 # define MAX_ARGS_NUMBER		4
 # define MAX_PLAYERS			4
-# define MEM_SIZE				(4*1024)
-# define IDX_MOD				(MEM_SIZE / 8)
-# define CHAMP_MAX_SIZE			(MEM_SIZE / 6)
+# define MEM_SIZE				4096
+# define IDX_MOD				512
+# define CHAMP_MAX_SIZE			682
 
 # define CYCLE_TO_DIE			1536
 # define CYCLE_DELTA			50

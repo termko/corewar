@@ -27,7 +27,7 @@ void	push_token(t_core *core, t_token *token)
 	}
 }
 
-t_token	*create_token(t_core *core, char *tmp)
+t_token	*create_token(t_core *core, char *tmp, t_string *str)
 {
 	t_token	*token;
 	t_ops	*op_tab;
@@ -42,9 +42,10 @@ t_token	*create_token(t_core *core, char *tmp)
 		i++;
 	}
 	if (!(op_tab[i].id))
-		error("No such operation");
+		parse_error("No such operation", str);
 	check_malloc(token = (t_token*)malloc(sizeof(t_token)));
 	token->op = op_tab[i];
+	token->str = str;
 	token->args = NULL;
 	token->next = NULL;
 	check_labels(core, token);

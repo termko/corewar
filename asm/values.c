@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/01 02:53:49 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 03:41:08 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/22 19:43:02 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	direct_value(t_token *token, int i)
 	while (tmp[j])
 	{
 		if (tmp[j] == '+' || (!ft_isdigit(tmp[j]) && tmp[j] != '-'))
-			error("Illegal character in direct arg");
+			parse_error("Illegal character in direct arg", token->str);
 		j++;
 	}
 	token->args[i].value = ft_atoi(tmp + 1);
@@ -38,13 +38,11 @@ void	register_value(t_token *token, int i)
 	check_malloc(trim = ft_strtrim(token->args[i].str));
 	tmp = trim + 1;
 	if (!ft_isdigital(tmp) || ft_strlen(tmp) > 2)
-		error("Illegal character in register arg");
+		parse_error("Illegal character in register arg", token->str);
 	token->args[i].value = ft_atoi(tmp);
 	free(trim);
 	token->args[i].type = 1;
 }
-
-#include "stdio.h" // DELETE ME
 
 void	indirect_value(t_token *token, int i)
 {
@@ -56,10 +54,7 @@ void	indirect_value(t_token *token, int i)
 	while (tmp[j])
 	{
 		if (tmp[j] == '+' || (!ft_isdigit(tmp[j]) && tmp[j] != '-'))
-		{
-			printf("???");
-			error("Illegal character in indirect arg");
-		}
+			parse_error("Illegal character in indirect arg", token->str);
 		j++;
 	}
 	token->args[i].value = ft_atoi(tmp);
@@ -80,7 +75,7 @@ void	direct_label(t_core *core, t_token *token, int i)
 		label = label->next;
 	}
 	if (!label)
-		error("No such label");
+		parse_error("No such label", token->str);
 	if (!label->to)
 		token->args[i].value = (int)(core->size - token->pos);
 	else
@@ -103,7 +98,7 @@ void	indirect_label(t_core *core, t_token *token, int i)
 		label = label->next;
 	}
 	if (!label)
-		error("No such label");
+		parse_error("No such label", token->str);
 	if (!label->to)
 		token->args[i].value = (int)(core->size - token->pos);
 	else

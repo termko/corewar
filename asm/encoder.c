@@ -30,7 +30,7 @@ void	args_values(t_core *core, t_token *token)
 		else if (token->args[i].type == 5)
 			indirect_label(core, token, i);
 		else
-			error("Unknown error parsing args");
+			parse_error("Unknown error parsing args", token->str);
 		i++;
 	}
 }

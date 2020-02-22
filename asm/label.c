@@ -6,24 +6,11 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/01 02:01:34 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 02:07:57 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/22 19:00:02 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "main.h"
-
-void	label_chars(char *string, int i)
-{
-	int j;
-
-	j = 0;
-	while (j < i)
-	{
-		if (!ft_strchr(LABEL_CHARS, string[i]))
-			error("Illegal characters in label");
-		j++;
-	}
-}
 
 void	check_labels(t_core *core, t_token *token)
 {
@@ -42,12 +29,26 @@ void	check_labels(t_core *core, t_token *token)
 	}
 }
 
-void	make_label(t_core *core, char *string, int i)
+void	label_chars(t_string *str, char *tmp)
+{
+	int i;
+
+	i = 0;
+	while (tmp[i])
+	{
+		if (!ft_strchr(LABEL_CHARS, tmp[i]))
+			parse_error("Illegal characters in label", str);
+		i++;
+	}
+}
+
+void	make_label(t_core *core, t_string *str, int i)
 {
 	t_label	*label;
 	char	*tmp;
 
-	check_malloc(tmp = ft_strsub(string, 0, i));
+	check_malloc(tmp = ft_strsub(str->string, 0, i));
+	label_chars(str, tmp);
 	if (!core->labels)
 	{
 		check_malloc(core->labels = (t_label*)malloc(sizeof(t_label)));

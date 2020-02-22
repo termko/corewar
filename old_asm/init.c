@@ -17,7 +17,7 @@ t_core	*init_core(void)
 	t_core *core;
 
 	check_malloc(core = (t_core*)malloc(sizeof(t_core)));
-	core->strs = NULL;
+	core->strings = NULL;
 	core->buff = NULL;
 	core->name = NULL;
 	core->comment = NULL;

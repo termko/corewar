@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/01 02:18:46 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 02:26:53 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/22 19:45:05 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,4 +52,29 @@ char	*crop_string(char *string, int start)
 		start++;
 	}
 	return (ret);
+}
+
+void	last_valued(t_core *core)
+{
+	int i;
+	int last;
+
+	i = 0;
+	last = 0;
+	while (i < core->buff_size)
+	{
+		if (core->buff[i] == '\n')
+			last = i;
+		i++;
+	}
+	if (last == core->buff_size - 1)
+		return ;
+	i = last;
+	while (i < core->buff_size)
+	{
+		if (core->buff[i] == COMMENT_CHAR || ft_isspace(core->buff[i]))
+			return ;
+		i++;
+	}
+	error("No newline at the end of file!");
 }

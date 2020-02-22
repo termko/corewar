@@ -17,6 +17,7 @@ void	init_readsize(int prev, t_size *s, t_read *r)
 	s->begin = prev;
 	s->last = prev;
 	s->end = prev;
+	s->string = 0;
 	r->is_comment = 0;
 	r->is_comchar = 0;
 	r->is_valued = 0;

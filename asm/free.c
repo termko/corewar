@@ -14,17 +14,17 @@
 
 void	free_strings(t_core *core)
 {
-	int i;
+	t_string	*str;
 
-	if (!core->strings)
+	if (!core->strs)
 		return ;
-	i = 0;
-	while (core->strings[i])
+	while (core->strs)
 	{
-		free(core->strings[i]);
-		i++;
+		str = core->strs->next;
+		free(core->strs->string);
+		free(core->strs);
+		core->strs = str;
 	}
-	free(core->strings);
 }
 
 void	free_labels(t_core *core)

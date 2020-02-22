@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/28 17:39:47 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 03:30:01 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/22 19:46:43 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,7 @@ void	read_file(int fd, t_core *core)
 			break ;
 		free(tmp);
 	}
-	if (tmp[i - 1] != '\n')
-		error("No endline at the end of file!");
+	last_valued(core);
 	free(tmp);
 }
 
@@ -58,26 +57,49 @@ t_core	*check_input(t_core *core, int ac, char **av)
 	return (core);
 }
 
+void	new_string(t_core *core, t_size size, int count)
+{
+	t_string	*string;
+
+	if (!core->strs)
+	{
+		check_malloc(core->strs = (t_string*)malloc(sizeof(t_string)));
+		string = core->strs;
+	}
+	else
+	{
+		string = core->strs;
+		while (string->next)
+			string = string->next;
+		check_malloc(string->next = (t_string*)malloc(sizeof(t_string)));
+		string = string->next;
+	}
+	if (size.last - size.begin + 1 <= 0)
+		string->string = NULL;
+	else
+	{
+		check_malloc(string->string =
+			ft_strsub(core->buff, size.begin, size.last - size.begin + 1));
+	}
+	string->id = count;
+	string->next = NULL;
+}
+
 void	bufftostr(t_core *core)
 {
 	int		count;
-	int		i;
 	int		prev;
 	t_size	size;
 
-	count = count_strings(core);
-	check_malloc(core->strings = (char**)malloc(sizeof(char*) * (count + 1)));
-	i = 0;
 	prev = 0;
-	while (i < count)
+	count = 1;
+	while (prev < core->buff_size)
 	{
 		size = get_strsize(core, prev);
+		count += size.string - 1;
 		prev = size.end;
-		check_malloc(core->strings[i] =
-				ft_strsub(core->buff, size.begin, size.last - size.begin + 1));
-		i++;
+		new_string(core, size, count);
 	}
-	core->strings[i] = NULL;
 }
 
 char	*get_string(char *loc)

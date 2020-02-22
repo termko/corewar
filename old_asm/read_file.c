@@ -58,59 +58,13 @@ t_core	*check_input(t_core *core, int ac, char **av)
 	return (core);
 }
 
-void	new_string(t_core *core, t_size size, int count)
-{
-	t_string	*string;
-
-	if (!core->strs)
-	{
-		check_malloc(core->strs = (t_string*)malloc(sizeof(t_string)));
-		string = core->strs;
-	}
-	else
-	{
-		string = core->strs;
-		while (string->next)
-			string = string->next;
-		check_malloc(string->next = (t_string*)malloc(sizeof(t_string)));
-		string = string->next;
-	}
-	if (size.last - size.begin + 1 <= 0)
-		string->string = NULL;
-	else
-	{
-		check_malloc(string->string =
-			ft_strsub(core->buff, size.begin, size.last - size.begin + 1));
-	}
-	string->id = count;
-	string->next = NULL;
-}
-
 void	bufftostr(t_core *core)
 {
 	int		count;
+	int		i;
 	int		prev;
 	t_size	size;
 
-	prev = 0;
-	count = 1;
-	while (prev < core->buff_size)
-	{
-		size = get_strsize(core, prev);
-		count += size.string - 1;
-		prev = size.end;
-		new_string(core, size, count);
-	}
-	/*
-	t_string *str;
-	str = core->strs;
-	while (str)
-	{
-		printf("[%d]: %s\n", str->id, str->string);
-		str = str->next;
-	}
-	*/
-/*
 	count = count_strings(core);
 	check_malloc(core->strings = (char**)malloc(sizeof(char*) * (count + 1)));
 	i = 0;
@@ -124,7 +78,6 @@ void	bufftostr(t_core *core)
 		i++;
 	}
 	core->strings[i] = NULL;
-*/
 }
 
 char	*get_string(char *loc)

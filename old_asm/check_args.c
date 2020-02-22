@@ -27,6 +27,8 @@ void	check_register(t_token *token, int arg)
 	token->args[arg].type = 2;
 }
 
+#include <stdio.h>
+
 void	check_indirect(t_token *token, char *string, int arg)
 {
 	token->args[arg].size = 2;
@@ -49,7 +51,7 @@ void	check_args(char **split, t_token *token, int arg)
 		exp = token->op.third;
 	check_malloc(string = ft_strtrim(split[arg]));
 	if (string[0] == '\0')
-		parse_error("Error with args", token->str);
+		error("Error with args");
 	if (exp[0] && string[0] == DIRECT_CHAR)
 		check_direct(token, string, arg);
 	else if (exp[2] && string[0] == 'r')
@@ -57,7 +59,7 @@ void	check_args(char **split, t_token *token, int arg)
 	else if (exp[1])
 		check_indirect(token, string, arg);
 	else
-		parse_error("Error with args", token->str);
+		error("Error with args");
 	token->size += token->args[arg].size;
 	check_malloc(token->args[arg].str = ft_strdup(string));
 	free(string);

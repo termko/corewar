@@ -45,14 +45,18 @@ int		size_comment(t_core *core, t_size s, t_read *r)
 
 int		size_newline(t_core *core, t_size *s, t_read *r)
 {
-	if (core->buff[s->end] == '\n' && !r->is_comment)
+	if (core->buff[s->end] == '\n')
 	{
-		if (!r->empty)
+		s->string++;
+		if (!r->is_comment)
+		{
+			if (!r->empty)
+				return (1);
+			r->is_comchar = 0;
+			s->end = s->end + 1;
+			s->begin = s->end;
 			return (1);
-		r->is_comchar = 0;
-		s->end = s->end + 1;
-		s->begin = s->end;
-		return (1);
+		}
 	}
 	return (0);
 }
@@ -62,7 +66,10 @@ int		size_quote(t_core *core, t_size s, t_read *r)
 	if (core->buff[s.end] == '\"')
 	{
 		if (!r->is_comchar)
+		{
+			r->is_valued = 1;
 			r->is_comment = (r->is_comment ? 0 : 1);
+		}
 		return (1);
 	}
 	else if (!r->is_comchar)

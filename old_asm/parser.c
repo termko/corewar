@@ -30,24 +30,24 @@ void	name_comment(t_core *core, char *string)
 	}
 }
 
-int		parse_label(t_core *core, t_string *str)
+int		parse_label(t_core *core, char *string)
 {
 	int		i;
 
 	i = 0;
-	while (str->string[i])
+	while (string[i])
 	{
-		if (str->string[i] == LABEL_CHAR || ft_isspace(str->string[i]))
+		if (string[i] == LABEL_CHAR || ft_isspace(string[i]))
 			break ;
 		i++;
 	}
-	if (!str->string[i])
-		parse_error("Unexpected end of line", str);
-	if (str->string[i] == LABEL_CHAR)
+	if (!string[i])
+		error("Unexpected end of line");
+	if (string[i] == LABEL_CHAR)
 	{
-		make_label(core, str, i++);
+		make_label(core, string, i++);
 		core->is_label++;
-		while (str->string[i] && ft_isspace(str->string[i]))
+		while (string[i] && ft_isspace(string[i]))
 			i++;
 	}
 	else
@@ -74,28 +74,28 @@ void	parse_next(t_token *token, char *string)
 	split_free(&split);
 }
 
-void	parse_token(t_core *core, t_string *str)
+void	parse_token(t_core *core, char *string)
 {
 	int		i;
 	int		j;
 	char	*tmp;
 	t_token	*token;
 
-	i = parse_label(core, str);
+	i = parse_label(core, string);
 	j = i;
-	while (str->string[i])
+	while (string[i])
 	{
-		if (str->string[i] == LABEL_CHAR)
-			parse_error("Double label error", str);
-		if (ft_isspace(str->string[i]))
+		if (string[i] == LABEL_CHAR)
+			error("Double label error");
+		if (ft_isspace(string[i]))
 			break ;
 		i++;
 	}
-	if (!str->string[i])
+	if (!string[i])
 		return ;
-	check_malloc(tmp = ft_strsub(str->string, j, i - j));
-	token = create_token(core, tmp, str);
-	parse_next(token, crop_string(str->string, i));
+	check_malloc(tmp = ft_strsub(string, j, i - j));
+	token = create_token(core, tmp);
+	parse_next(token, crop_string(string, i));
 	token->pos = core->size;
 	core->size += token->size;
 	free(tmp);
@@ -103,24 +103,17 @@ void	parse_token(t_core *core, t_string *str)
 
 void	parser(t_core *core)
 {
-	t_string	*str;
 	int		i;
 
-	str = core->strs;
 	i = 0;
-	while (str)
+	while (core->strings[i])
 	{
 		if (i < 2)
-			name_comment(core, str->string);
+			name_comment(core, core->strings[i]);
 		else if (!core->name || !core->comment)
 			error("No name or comment");
 		else
-			parse_token(core, str);
-		str = str->next;
-		if (!str)
-			error("No newline at the end of file");
-		else if (!str->string)
-			return ;
+			parse_token(core, core->strings[i]);
 		i++;
 	}
 }

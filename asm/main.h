@@ -6,7 +6,7 @@
 /*   By: ydavis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/05 18:32:45 by ydavis            #+#    #+#             */
-/*   Updated: 2020/02/01 03:42:34 by ydavis           ###   ########.fr       */
+/*   Updated: 2020/02/22 19:48:37 by ydavis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,18 @@ typedef struct	s_ops
 	int			tdir;
 }				t_ops;
 
+typedef struct	s_string
+{
+	char			*string;
+	int				id;
+	struct s_string	*next;
+}				t_string;
+
 typedef struct	s_token
 {
 	t_ops			op;
 	t_args			*args;
+	t_string		*str;
 	int				size;
 	int				pos;
 	char			*remain;
@@ -61,6 +69,7 @@ typedef struct	s_size
 	int		begin;
 	int		last;
 	int		end;
+	int		string;
 }				t_size;
 
 typedef struct	s_label
@@ -73,17 +82,17 @@ typedef struct	s_label
 
 typedef struct	s_core
 {
-	char	*buff;
-	char	*file;
-	int		buff_size;
-	char	**strings;
-	t_label	*labels;
-	t_token	*tokens;
-	int		size;
-	int		is_label;
-	char	*name;
-	char	*comment;
-	void	*out;
+	char		*buff;
+	char		*file;
+	int			buff_size;
+	t_string	*strs;
+	t_label		*labels;
+	t_token		*tokens;
+	int			size;
+	int			is_label;
+	char		*name;
+	char		*comment;
+	void		*out;
 }				t_core;
 
 void			check_malloc(void *addr);
@@ -92,9 +101,11 @@ void			check_split(char **split, int count);
 void			realloc_char(t_core *core, char *tmp, int cur, int i);
 int				ft_isspace(char c);
 void			error(char *msg);
+void			parse_error(char *msg, t_string *str);
 void			usage(void);
 int				count_strings(t_core *core);
 void			read_file(int fd, t_core *core);
+void			last_valued(t_core *core);
 t_core			*check_input(t_core *core, int ac, char **av);
 void			bufftostr(t_core *core);
 char			*get_string(char *loc);
@@ -102,9 +113,9 @@ t_size			get_strsize(t_core *core, int prev);
 void			init_readsize(int prev, t_size *s, t_read *r);
 void			parser(t_core *core);
 void			name_comment(t_core *core, char *string);
-void			parse_token(t_core *core, char *string);
-void			make_label(t_core *core, char *string, int i);
-t_token			*create_token(t_core *core, char *string);
+void			parse_token(t_core *core, t_string *str);
+void			make_label(t_core *core, t_string *str, int i);
+t_token			*create_token(t_core *core, char *tmp, t_string *str);
 void			parse_next(t_token *token, char *string);
 char			*crop_string(char *string, int i);
 void			name_comment(t_core *core, char *string);
